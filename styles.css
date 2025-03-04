@@ -1,0 +1,110 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+.game-container {
+    display: flex;
+    gap: 20px;
+}
+.board {
+    width: 300px;
+    height: 600px;
+    background-color: #111;
+    border: 2px solid #333;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(20, 1fr);
+    gap: 1px;
+}
+.cell {
+    background-color: #222;
+    border-radius: 2px;
+}
+.cell.filled {
+    background-color: #3498db;
+}
+.cell.I {
+    background-color: #00ffff;
+}
+.cell.O {
+    background-color: #ffff00;
+}
+.cell.T {
+    background-color: #800080;
+}
+.cell.S {
+    background-color: #00ff00;
+}
+.cell.Z {
+    background-color: #ff0000;
+}
+.cell.J {
+    background-color: #0000ff;
+}
+.cell.L {
+    background-color: #ff7f00;
+}
+.info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.next-piece {
+    width: 120px;
+    height: 120px;
+    background-color: #111;
+    border: 2px solid #333;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 1px;
+}
+.score-panel {
+    color: #333;
+    font-size: 18px;
+}
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    display: none;
+}
+.controls {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+button {
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+button:hover {
+    background-color: #2980b9;
+}
+#fps-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
