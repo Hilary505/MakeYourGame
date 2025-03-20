@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameOverElement = document.getElementById('game-over');
     const finalScoreElement = document.getElementById('final-score');
     const restartButton = document.getElementById('restart-button');
+    const playAgain = document.getElementById('play-again');
 
     // FPS counter function
     function updateFPS() {
@@ -336,6 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
         level = 1;
         isPaused = false;
         isGameOver = false;
+
+        // Reset start button
+        startButton.textContent = 'Pause';
         
         // Hide game over screen
         gameOverElement.style.display = 'none';
@@ -393,6 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle keyboard input
     function handleKeydown(e) {
         if (isGameOver) return;
+        e.preventDefault();
         
         switch (e.key) {
             case 'ArrowLeft':
@@ -420,8 +425,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', handleKeydown);
     startButton.addEventListener('click', togglePause);
     restartButton.addEventListener('click', startGame);
+    playAgain.addEventListener('click', startGame);
 
     // Initialize the game
     createBoard();
-    startGame();
+    startGame(); 
 });
