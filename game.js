@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const BOARD_WIDTH = 10;
     const BOARD_HEIGHT = 20;
     const EMPTY = 0;
+    const TARGET_FPS = 60;
+    const FRAME_TIME = 1000 / TARGET_FPS;
     
     // Game state
     let board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(EMPTY));
@@ -22,6 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPaused = false;
     let isGameOver = false;
     let animationFrameId = null;
+    let timeSinceLastDrop = 0;
+    let cellCache = null;
+    let nextPieceCellCache = null;
+    let lastFrameTime = null;
+    
+    
 
     
 
@@ -36,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalScoreElement = document.getElementById('final-score');
     const restartButton = document.getElementById('restart-button');
     const playAgain = document.getElementById('play-again');
+    
 
     // FPS counter function
     function updateFPS() {
@@ -83,6 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+    // Add this after creating the board
+    function enableHardwareAcceleration() {
+        boardElement.style.transform = 'translateZ(0)';
+        boardElement.style.willChange = 'transform';
+        boardElement.style.backfaceVisibility = 'hidden';
+    
+        nextPieceElement.style.transform = 'translateZ(0)';
+        nextPieceElement.style.willChange = 'transform';
+        nextPieceElement.style.backfaceVisibility = 'hidden';
+    }
 
     // Get random tetromino
     function getRandomTetromino() {
@@ -96,69 +115,163 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Draw the current state of the board
-    function draw() {
-        // Clear the board visually
+    // // Draw the current state of the board
+    // function draw() {
+    //     // Clear the board visually
+    //     const cells = boardElement.querySelectorAll('.cell');
+    //     cells.forEach(cell => {
+    //         cell.className = 'cell';
+    //     });
+
+    //     // Draw the fixed pieces on the board
+    //     for (let row = 0; row < BOARD_HEIGHT; row++) {
+    //         for (let col = 0; col < BOARD_WIDTH; col++) {
+    //             if (board[row][col] !== EMPTY) {
+    //                 const cell = boardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    //                 cell.classList.add('filled');
+    //                 cell.classList.add(board[row][col]);
+    //             }
+    //         }
+    //     }
+
+    //     // Draw the current piece
+    //     if (currentPiece) {
+    //         for (let row = 0; row < currentPiece.shape.length; row++) {
+    //             for (let col = 0; col < currentPiece.shape[row].length; col++) {
+    //                 if (currentPiece.shape[row][col]) {
+    //                     const boardRow = currentPiece.y + row;
+    //                     const boardCol = currentPiece.x + col;
+    //                     if (boardRow >= 0 && boardRow < BOARD_HEIGHT && boardCol >= 0 && boardCol < BOARD_WIDTH) {
+    //                         const cell = boardElement.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
+    //                         cell.classList.add('filled');
+    //                         cell.classList.add(currentPiece.color);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     // Draw the next piece
+    //     const nextCells = nextPieceElement.querySelectorAll('.cell');
+    //     nextCells.forEach(cell => {
+    //         cell.className = 'cell';
+    //     });
+
+    //     if (nextPiece) {
+    //         for (let row = 0; row < nextPiece.shape.length; row++) {
+    //             for (let col = 0; col < nextPiece.shape[row].length; col++) {
+    //                 if (nextPiece.shape[row][col]) {
+    //                     const previewRow = row + (4 - nextPiece.shape.length) / 2;
+    //                     const previewCol = col + (4 - nextPiece.shape[row].length) / 2;
+    //                     const cell = nextPieceElement.querySelector(`[data-row="${Math.floor(previewRow)}"][data-col="${Math.floor(previewCol)}"]`);
+    //                     if (cell) {
+    //                         cell.classList.add('filled');
+    //                         cell.classList.add(nextPiece.color);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     // Update score display
+    //     scoreElement.textContent = score;
+    //     linesElement.textContent = lines;
+    //     levelElement.textContent = level;
+    // }
+    // Cell cache to avoid DOM queries
+
+
+function draw() {
+    // Initialize cell cache if not done yet
+    if (!cellCache) {
+        cellCache = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(null));
         const cells = boardElement.querySelectorAll('.cell');
         cells.forEach(cell => {
-            cell.className = 'cell';
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+            if (row < BOARD_HEIGHT && col < BOARD_WIDTH) {
+                cellCache[row][col] = cell;
+            }
         });
-
-        // Draw the fixed pieces on the board
-        for (let row = 0; row < BOARD_HEIGHT; row++) {
-            for (let col = 0; col < BOARD_WIDTH; col++) {
-                if (board[row][col] !== EMPTY) {
-                    const cell = boardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                    cell.classList.add('filled');
-                    cell.classList.add(board[row][col]);
-                }
-            }
-        }
-
-        // Draw the current piece
-        if (currentPiece) {
-            for (let row = 0; row < currentPiece.shape.length; row++) {
-                for (let col = 0; col < currentPiece.shape[row].length; col++) {
-                    if (currentPiece.shape[row][col]) {
-                        const boardRow = currentPiece.y + row;
-                        const boardCol = currentPiece.x + col;
-                        if (boardRow >= 0 && boardRow < BOARD_HEIGHT && boardCol >= 0 && boardCol < BOARD_WIDTH) {
-                            const cell = boardElement.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
-                            cell.classList.add('filled');
-                            cell.classList.add(currentPiece.color);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Draw the next piece
+        
+        // Cache for next piece preview
+        nextPieceCellCache = Array(4).fill().map(() => Array(4).fill(null));
         const nextCells = nextPieceElement.querySelectorAll('.cell');
         nextCells.forEach(cell => {
-            cell.className = 'cell';
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+            if (row < 4 && col < 4) {
+                nextPieceCellCache[row][col] = cell;
+            }
         });
-
-        if (nextPiece) {
-            for (let row = 0; row < nextPiece.shape.length; row++) {
-                for (let col = 0; col < nextPiece.shape[row].length; col++) {
-                    if (nextPiece.shape[row][col]) {
-                        const previewRow = row + (4 - nextPiece.shape.length) / 2;
-                        const previewCol = col + (4 - nextPiece.shape[row].length) / 2;
-                        const cell = nextPieceElement.querySelector(`[data-row="${Math.floor(previewRow)}"][data-col="${Math.floor(previewCol)}"]`);
-                        if (cell) {
-                            cell.classList.add('filled');
-                            cell.classList.add(nextPiece.color);
-                        }
+    }
+    
+    // Create a board state that includes the current piece
+    const tempBoard = JSON.parse(JSON.stringify(board));
+    
+    // Add current piece to temporary board
+    if (currentPiece) {
+        for (let row = 0; row < currentPiece.shape.length; row++) {
+            for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                if (currentPiece.shape[row][col]) {
+                    const boardRow = currentPiece.y + row;
+                    const boardCol = currentPiece.x + col;
+                    if (boardRow >= 0 && boardRow < BOARD_HEIGHT && boardCol >= 0 && boardCol < BOARD_WIDTH) {
+                        tempBoard[boardRow][boardCol] = currentPiece.color;
                     }
                 }
             }
         }
-
-        // Update score display
-        scoreElement.textContent = score;
-        linesElement.textContent = lines;
-        levelElement.textContent = level;
     }
+    
+    // Update board cells
+    for (let row = 0; row < BOARD_HEIGHT; row++) {
+        for (let col = 0; col < BOARD_WIDTH; col++) {
+            const cell = cellCache[row][col];
+            const value = tempBoard[row][col];
+            
+            if (value !== EMPTY) {
+                // Cell should be filled
+                if (!cell.classList.contains('filled') || 
+                    !cell.classList.contains(value)) {
+                    cell.className = 'cell filled ' + value;
+                }
+            } else if (cell.classList.contains('filled')) {
+                // Cell should be empty
+                cell.className = 'cell';
+            }
+        }
+    }
+    
+    // Update next piece preview
+    // First clear all next piece cells
+    for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+            nextPieceCellCache[row][col].className = 'cell';
+        }
+    }
+    
+    // Then draw the next piece
+    if (nextPiece) {
+        for (let row = 0; row < nextPiece.shape.length; row++) {
+            for (let col = 0; col < nextPiece.shape[row].length; col++) {
+                if (nextPiece.shape[row][col]) {
+                    const previewRow = row + Math.floor((4 - nextPiece.shape.length) / 2);
+                    const previewCol = col + Math.floor((4 - nextPiece.shape[row].length) / 2);
+                    if (previewRow >= 0 && previewRow < 4 && previewCol >= 0 && previewCol < 4) {
+                        const cell = nextPieceCellCache[previewRow][previewCol];
+                        cell.className = 'cell filled ' + nextPiece.color;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Update score display (no change needed here)
+    scoreElement.textContent = score;
+    linesElement.textContent = lines;
+    levelElement.textContent = level;
+}
 
     // Check if the current position is valid
     function isValidMove(piece, offsetX = 0, offsetY = 0) {
@@ -223,6 +336,32 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPiece.shape = rotatedPiece.shape;
             draw();
         }
+        // If rotation failed, try wall kicks
+        if (!isValidMove(rotatedPiece)) {
+        // Try kicking off the right wall
+        rotatedPiece.x -= 1;
+        if (isValidMove(rotatedPiece)) {
+            currentPiece.shape = rotatedPiece.shape;
+            currentPiece.x -= 1;
+            draw();
+            return;
+        }
+        
+        // Try kicking off the left wall
+        rotatedPiece.x += 2; // +2 because we already did -1
+        if (isValidMove(rotatedPiece)) {
+            currentPiece.shape = rotatedPiece.shape;
+            currentPiece.x += 1;
+            draw();
+            return;
+        }
+        
+        // Reset position if all kicks failed
+        rotatedPiece.x -= 1;
+    } else {
+        currentPiece.shape = rotatedPiece.shape;
+        draw();
+    }
     }
 
     // Fix the current piece to the board
@@ -301,27 +440,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Speed up the game as level increases
-    function speedUp() {
-        clearInterval(gameInterval);
-        const speed = Math.max(100, 1000 - (level - 1) * 100); // Decrease by 100ms per level, min 100ms
-        gameInterval = setInterval(tick, speed);
-    }
+    // // Speed up the game as level increases
+    // function speedUp() {
+    //     clearInterval(gameInterval);
+    //     const speed = Math.max(100, 1000 - (level - 1) * 100); // Decrease by 100ms per level, min 100ms
+    //     gameInterval = setInterval(tick, speed);
+    // }
 
-    // Game tick - advances the game state
-    function tick() {
-        if (isPaused || isGameOver) return;
+    // // Game tick - advances the game state
+    // function tick() {
+    //     if (isPaused || isGameOver) return;
         
-        if (!movePiece(0, 1)) {
-            fixPiece();
-        }
-    }
+    //     if (!movePiece(0, 1)) {
+    //         fixPiece();
+    //     }
+    // }
 
     // Start the game
     function startGame() {
-        if (gameInterval) {
-            clearInterval(gameInterval);
-        }
+        // if (gameInterval) {
+        //     clearInterval(gameInterval);
+        // }
         
         // Cancel any existing animation frame
         if (animationFrameId) {
@@ -337,23 +476,57 @@ document.addEventListener('DOMContentLoaded', () => {
         level = 1;
         isPaused = false;
         isGameOver = false;
+        timeSinceLastDrop = 0;
+        lastFrameTime = null;
 
         // Reset start button
         startButton.textContent = 'Pause';
         
         // Hide game over screen
         gameOverElement.style.display = 'none';
-        
-        // Start game loop
-        gameInterval = setInterval(tick, 1000);
-        
-        // Start FPS counter
-        lastTime = performance.now();
-        frameCount = 0;
-        animationFrameId = requestAnimationFrame(updateFPS);
+
+    // Start the game loop
+    lastTime = performance.now();
+    frameCount = 0;
+    animationFrameId = requestAnimationFrame(gameLoop);
         
         draw();
     }
+    // Start game loop with requestAnimationFrame
+    function gameLoop(timestamp) {
+    const now = timestamp || performance.now();
+    const deltaTime = now - (lastFrameTime || now);
+    lastFrameTime = now;
+    
+    // Update FPS counter
+    frameCount++;
+    const fpsElapsed = now - lastTime;
+    if (fpsElapsed >= fpsInterval) {
+        fps = Math.round((frameCount * 1000) / fpsElapsed);
+        fpsElement.textContent = fps;
+        frameCount = 0;
+        lastTime = now;
+    }
+    
+    if (!isPaused && !isGameOver) {
+        // Handle game logic at appropriate intervals
+        timeSinceLastDrop += deltaTime;
+        const dropInterval = Math.max(100, 1000 - (level - 1) * 100); // Same as your speedUp function
+        
+        if (timeSinceLastDrop > dropInterval) {
+            if (!movePiece(0, 1)) {
+                fixPiece();
+            }
+            timeSinceLastDrop = 0;
+        }
+    }
+    
+    // Always draw every frame for smooth rendering
+    draw();
+    
+    // Request next frame
+    animationFrameId = requestAnimationFrame(gameLoop);
+}
 
     // Pause/resume the game
     function togglePause() {
@@ -365,24 +538,24 @@ document.addEventListener('DOMContentLoaded', () => {
         isPaused = !isPaused;
         startButton.textContent = isPaused ? 'Resume' : 'Pause';
         
-        // Handle animation frame
-        if (isPaused) {
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-            }
-        } else {
-            lastTime = performance.now();
-            frameCount = 0;
-            animationFrameId = requestAnimationFrame(updateFPS);
-        }
+        // // Handle animation frame
+        // if (isPaused) {
+        //     if (animationFrameId) {
+        //         cancelAnimationFrame(animationFrameId);
+        //         animationFrameId = null;
+        //     }
+        // } else {
+        //     lastTime = performance.now();
+        //     frameCount = 0;
+        //     animationFrameId = requestAnimationFrame(updateFPS);
+        // }
     }
 
     // End the game
     function endGame() {
         isGameOver = true;
         isPaused = true;
-        clearInterval(gameInterval);
+        // clearInterval(gameInterval);
         
         // Stop FPS counter
         if (animationFrameId) {
@@ -429,5 +602,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize the game
     createBoard();
+    enableHardwareAcceleration();
     startGame(); 
 });
