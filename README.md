@@ -1,6 +1,8 @@
 # make-your-game
 Make-your-game  is designed to keep people occupied and relieve boredom. The game is  a single player only  designed using JavaScript.
 
+![alt text](<Screenshot from 2025-03-20 16-47-05.png>)
+
 ## Features
 
 **Game runs at least 60FPS at all times**
@@ -55,5 +57,3 @@ Contributions are what make the open-source  community such an amazing place to 
 
  **Open a Pull Request**
 
-
-![alt text](<Screenshot from 2025-03-20 16-47-05.png>)

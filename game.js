@@ -23,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let isGameOver = false;
     let animationFrameId = null;
 
-    
-
     // DOM Elements
     const boardElement = document.getElementById('board');
     const nextPieceElement = document.getElementById('next-piece');
