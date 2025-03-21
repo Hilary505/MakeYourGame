@@ -57,3 +57,6 @@ const TETROMINOS = {
         color: 'L'
     }
 };
+
+// Export the TETROMINOS object
+module.exports = { TETROMINOS };
