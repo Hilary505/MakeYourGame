@@ -31,8 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     
 
-    
-
     // DOM Elements
     const boardElement = document.getElementById('board');
     const nextPieceElement = document.getElementById('next-piece');

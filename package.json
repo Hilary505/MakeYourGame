@@ -1,0 +1,12 @@
+{
+  "name": "make-your-game",
+  "version": "1.0.0",
+  "description": "Make-your-game  is designed to keep people occupied and relieve boredom. The game is  a single player only  designed using JavaScript.",
+  "main": "game.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
