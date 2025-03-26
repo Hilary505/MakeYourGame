@@ -5,7 +5,8 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: #333;
+    overflow: hidden;
 }
 .game-container {
     display: flex;
@@ -21,9 +22,15 @@ body {
     grid-template-rows: repeat(20, 1fr);
     gap: 1px;
 }
+.board, .next-piece {
+    contain: strict;
+    position: relative;
+}
 .cell {
     background-color: #222;
     border-radius: 2px;
+    will-change: transform, background-color;
+    transform: translateZ(0);         
 }
 .cell.filled {
     background-color: #3498db;
