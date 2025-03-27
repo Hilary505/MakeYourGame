@@ -72,7 +72,7 @@ body {
     gap: 1px;
 }
 .score-panel {
-    color: #333;
+    color: white;
     font-size: 18px;
 }
 .game-over {
@@ -115,4 +115,14 @@ button:hover {
     padding: 5px 10px;
     border-radius: 5px;
     font-size: 14px;
+}
+@keyframes flash {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0.5; }
+}
+
+.cell.flash {
+    animation: flash 0.3s ease-in-out;
+    background-color: white !important;
+    z-index: 1;
 }
