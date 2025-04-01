@@ -113,71 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // // Draw the current state of the board
-    // function draw() {
-    //     // Clear the board visually
-    //     const cells = boardElement.querySelectorAll('.cell');
-    //     cells.forEach(cell => {
-    //         cell.className = 'cell';
-    //     });
-
-    //     // Draw the fixed pieces on the board
-    //     for (let row = 0; row < BOARD_HEIGHT; row++) {
-    //         for (let col = 0; col < BOARD_WIDTH; col++) {
-    //             if (board[row][col] !== EMPTY) {
-    //                 const cell = boardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-    //                 cell.classList.add('filled');
-    //                 cell.classList.add(board[row][col]);
-    //             }
-    //         }
-    //     }
-
-    //     // Draw the current piece
-    //     if (currentPiece) {
-    //         for (let row = 0; row < currentPiece.shape.length; row++) {
-    //             for (let col = 0; col < currentPiece.shape[row].length; col++) {
-    //                 if (currentPiece.shape[row][col]) {
-    //                     const boardRow = currentPiece.y + row;
-    //                     const boardCol = currentPiece.x + col;
-    //                     if (boardRow >= 0 && boardRow < BOARD_HEIGHT && boardCol >= 0 && boardCol < BOARD_WIDTH) {
-    //                         const cell = boardElement.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
-    //                         cell.classList.add('filled');
-    //                         cell.classList.add(currentPiece.color);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     // Draw the next piece
-    //     const nextCells = nextPieceElement.querySelectorAll('.cell');
-    //     nextCells.forEach(cell => {
-    //         cell.className = 'cell';
-    //     });
-
-    //     if (nextPiece) {
-    //         for (let row = 0; row < nextPiece.shape.length; row++) {
-    //             for (let col = 0; col < nextPiece.shape[row].length; col++) {
-    //                 if (nextPiece.shape[row][col]) {
-    //                     const previewRow = row + (4 - nextPiece.shape.length) / 2;
-    //                     const previewCol = col + (4 - nextPiece.shape[row].length) / 2;
-    //                     const cell = nextPieceElement.querySelector(`[data-row="${Math.floor(previewRow)}"][data-col="${Math.floor(previewCol)}"]`);
-    //                     if (cell) {
-    //                         cell.classList.add('filled');
-    //                         cell.classList.add(nextPiece.color);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     // Update score display
-    //     scoreElement.textContent = score;
-    //     linesElement.textContent = lines;
-    //     levelElement.textContent = level;
-    // }
-    // Cell cache to avoid DOM queries
-
 
 function draw() {
     // Initialize cell cache if not done yet
@@ -438,22 +373,6 @@ function draw() {
         }
     }
 
-    // // Speed up the game as level increases
-    // function speedUp() {
-    //     clearInterval(gameInterval);
-    //     const speed = Math.max(100, 1000 - (level - 1) * 100); // Decrease by 100ms per level, min 100ms
-    //     gameInterval = setInterval(tick, speed);
-    // }
-
-    // // Game tick - advances the game state
-    // function tick() {
-    //     if (isPaused || isGameOver) return;
-        
-    //     if (!movePiece(0, 1)) {
-    //         fixPiece();
-    //     }
-    // }
-
     // Start the game
     function startGame() {
         // if (gameInterval) {
@@ -536,17 +455,6 @@ function draw() {
         isPaused = !isPaused;
         startButton.textContent = isPaused ? 'Resume' : 'Pause';
         
-        // // Handle animation frame
-        // if (isPaused) {
-        //     if (animationFrameId) {
-        //         cancelAnimationFrame(animationFrameId);
-        //         animationFrameId = null;
-        //     }
-        // } else {
-        //     lastTime = performance.now();
-        //     frameCount = 0;
-        //     animationFrameId = requestAnimationFrame(updateFPS);
-        // }
     }
 
     // End the game
